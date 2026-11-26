@@ -2,7 +2,7 @@
 
 A menu-driven task management system built with **8086 Assembly Language**.
 
-This project was created as part of my **CSE341** coursework.  
+This project was created as part of my **CSE341** coursework at BRAC University.  
 The main goal of this project is to manage simple tasks using low-level Assembly programming concepts such as arrays, procedures, loops, conditional jumps, memory offsets, and DOS interrupts.
 
 ---
@@ -92,6 +92,34 @@ Basic steps:
 9. Filter by Priority
 0. Exit
 ```
+
+---
+
+## ⚙️ How It Works
+
+All data lives in fixed-size arrays in the `.DATA` segment. One task is one index across these parallel arrays:
+
+| Array | Size | Holds |
+|---|---|---|
+| `TASK_IDS` | 20 bytes | Task ID |
+| `TASK_TITLES` | 20 × 20 bytes | Title, up to 19 characters |
+| `TASK_PRIORITIES` | 20 bytes | 1 = Low, 2 = Medium, 3 = High |
+| `TASK_STATUS` | 20 bytes | Pending or Done |
+| `TASK_ACTIVE` | 20 bytes | 1 if the task exists, 0 if deleted |
+| `DESC_BUFFER` + `TASK_DESC_OFFSETS` | 2 KB + 20 words | All descriptions in one shared buffer, with each task's start offset |
+
+Key ideas in the code:
+
+- **Sorting**: bubble sort by priority (High first). Every swap moves the matching entries in all the parallel arrays, including the 20-byte titles, so each task stays intact.
+- **Delete and undo**: deleting only sets `TASK_ACTIVE` to 0 and remembers the index in `LAST_DELETED_INDEX`, so the last deleted task can be restored.
+- **Input and output**: `READ_NUMBER`, `PRINT_NUMBER`, `READ_STRING` and `READ_DYNAMIC_STRING` are hand-written procedures built on DOS `INT 21H`.
+
+### Limits
+
+- Up to 20 tasks per run.
+- Titles up to 19 characters; descriptions share a 2 KB buffer.
+- Undo restores only the most recently deleted task.
+- Tasks are kept in memory only and are lost when the program exits.
 
 ---
 
